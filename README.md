@@ -1,4 +1,4 @@
-WSNSping2014_TermProject - Forest Fire Monitoring
+WSNTermProject - Forest Fire Monitoring
 ========================
 
 For my project I will design a wireless sensor network that will take readings
