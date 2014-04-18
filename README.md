@@ -8,6 +8,7 @@ upload the readings to an off-site database. This system could potentially be
 used with mobile robots within hot, arid deserts to log environmental 
 conditions within the desert. The required components that will be developed in
 order for this system to work will be:
+========================
 
 End Device
 	- The circuit used to connect the humidity and temperature sensors to the 
