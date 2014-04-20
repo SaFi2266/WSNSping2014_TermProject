@@ -6,9 +6,9 @@ from HIH-4030 humidity sensors and TMP36 temperature sensors attached to XBee
 series 2 radios and periodically send the readings to a gateway node which will
 upload the readings to an off-site database. This system could potentially be 
 used with mobile robots within hot, arid deserts to log environmental 
-conditions within the desert. The required components that will be developed in
-order for this system to work will be:
-========================
+conditions within the desert. 
+
+#####The required components that will be developed for this system will be:
 
 End Device
 	- The circuit used to connect the humidity and temperature sensors to the 
