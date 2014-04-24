@@ -26,16 +26,27 @@ if ($db->connect_error)
 if ($_REQUEST["password"] == 'tempPassword') {
 
 	// Get the id of the mote with the given radio address from the database
-	$selectString = "SELECT id FROM sensornetworks.sp14_elliotd_motes"
-	." WHERE radioAddress='$radioAddress';";	
-	$res = $db->query($selectString);
+	$selectString = "SELECT id FROM sensornetworks.sp14_elliotd_motes" .
+		" WHERE radioAddress='$radioAddress';";	
+	$res = $db->query($selectString) or die(mysqli_error($db));
 	$row = $res->fetch_assoc();
 	$moteId = $row['id'];
 	
+	// Create the mote if it doesn't exist in the database
+	if (empty($moteId)) {
+		$moteString = "INSERT INTO sensornetworks.sp14_elliotd_motes" .
+			"(radioAddress, description) " .
+			"VALUES ('$radioAddress', 'Auto-Generated');";
+		$db->query($moteString) or die(mysqli_error($db));
+		$res = $db->query($selectString);
+		$row = $res->fetch_assoc();
+		$moteId = $row['id'];
+	} // if - no moteId
+	
 	// Insert the mote data into the database
 	$insertString = "INSERT INTO sensornetworks.sp14_elliotd_datalog" .
-	" (moteId, readingTime, temperature, humidity)" .
-	" VALUES ($moteId,'$readingTime',$temperature,$humidity);";
+		" (moteId, readingTime, temperature, humidity)" .
+		" VALUES ($moteId,'$readingTime',$temperature,$humidity);";
 	$db->query($insertString) or die(mysqli_error($db));
 	
 	echo 'Values successfully uploaded';
