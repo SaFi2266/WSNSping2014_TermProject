@@ -1,0 +1,353 @@
+/* Credit: http://www.templatemo.com */
+
+body, html { overflow: hidden; }
+
+body {
+    font-size: 1em;
+    line-height: 1.4;
+    font-family: 'Raleway', sans-serif;
+    font-style: normal; 
+    -webkit-font-smoothing: antialiased; /* Fix for webkit rendering */
+    -webkit-text-size-adjust: 100%;
+}
+
+h1, h2, h3, h4, h5, h6, span, p { font-family: 'Raleway', sans-serif; }
+
+hr {
+    display: block;
+    height: 1px;
+    border: 0;
+    border-top: 1px solid #ccc;
+    margin: 1em 0;
+    padding: 0;
+}
+
+img {
+    vertical-align: middle;
+}
+
+/* Preloader */
+#preloader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #fff; /* change if the mask should have another color then white */
+    z-index: 99; /* makes sure it stays on top */
+}
+
+#status {
+    width: 200px;
+    height: 200px;
+    position: absolute;
+    left: 50%; /* centers the loading animation horizontally one the screen */
+    top: 50%; /* centers the loading animation vertically one the screen */
+    background-image: url(../images/status.gif); /* path to your loading animation */
+    background-repeat: no-repeat;
+    background-position: center;
+    margin: -100px 0 0 -100px; /* is width and height divided by two */
+}
+
+/* General */
+#main-wrapper {
+     overflow: hidden;
+}
+
+.templatemo-site-title { 
+    color: #fff !important; 
+    text-shadow: 0px 2px 3px rgba(0, 0, 0, 1);
+	font-size: 48px;
+}
+
+.templatemo-site-title a, .templatemo-site-title a:hover { 
+	color: #fff;
+	text-decoration: none;
+}
+
+img.slide {
+    width: 100%; 
+    z-index: -9999999; 
+    position: absolute;
+}
+
+.active {
+    display: block;
+}
+
+.inactive {
+    left: 703px;
+    display: none;
+}
+
+.image-section {
+    position: fixed;
+}
+
+.image-container {
+    position: relative;
+}
+
+.image-container img {
+    position: absolute;
+}
+
+.templatemo-content {
+    position: relative;
+    overflow: hidden; 
+    margin-top: 7%;
+	margin-left:20%;
+}
+
+.templatemo-content section {
+    font-family: 'Raleway', sans-serif;
+    position: relative; 
+    overflow: hidden;
+    top: 0; 
+    background-color: rgba(255,255,255,0.85);
+    padding-bottom: 10px;
+}
+
+.templatemo-content-wrapper {
+    overflow: hidden;
+}
+
+.templatemo-content h2 {
+    color: #000;
+    font-family: 'Raleway', sans-serif;
+}
+
+.templatemo-content p {
+    font-family: 'Raleway', sans-serif;
+    color: #000;
+    font-size: 16px;
+}
+
+.menu {
+    position: fixed; 
+    width: 220px;
+    z-index: 1; 
+    top: 35px;
+}
+
+#menu-list {
+    background-color: rgba(0, 0, 0,0.5);
+    font-size: 16px; 
+    padding: 0;
+}
+
+#menu-list > li {
+    display: block;
+}
+
+#menu-list > li > a {
+    font-family: 'Raleway', sans-serif; 
+    padding: 10px 0 10px 30px; 
+    text-decoration: none; 
+    display: block;
+    color: #fff; 
+}
+
+#menu-list > .active > a,
+#menu-list > li > a:hover { 
+    background-color: rgba(255,255,255,0.25);
+}
+
+#responsive {
+    font-size: 16px;
+    padding: 0;
+    background-color: rgba(0,0,0,0.5);
+}
+
+#responsive li {
+    display: block;
+}
+
+#responsive li a {
+    font-family: 'Raleway', sans-serif; 
+    color: #fff; 
+    text-decoration: none; 
+    padding: 10px 0;
+    display: block;
+}
+
+#responsive > .active > a,
+#responsive li a:hover {
+    background-color: rgba(0,0,0,0.5);
+}
+
+.templatemo-content {
+    padding-bottom: 6%;
+}
+
+.footer {
+    overflow: hidden; 
+    position: fixed; 
+    bottom: 0px;
+	right:0px;
+	background-color:rgba(0,0,0,.75);
+}
+
+.footer-text {
+    font-family: 'Raleway', sans-serif; 
+    color: rgba(255,255,255,0.5); 
+    text-shadow: 0px 2px 3px rgba(0, 0, 0, 1);
+    margin-left: 10px;
+	margin-bottom: 5px;
+	margin-top: 5px;
+    font-size: 14px;
+}
+
+.footer-text a, .footer-text a:hover { 
+	color: rgba(255,255,255,0.5);
+	text-decoration: none;
+}
+
+@media (max-width: 991px) {
+    .footer {
+        overflow:hidden; 
+        position:static;
+        text-align: center;
+        
+    }
+    .footer-text {
+        margin-left: 0;
+    }
+}
+
+.overlay {
+     visibility: hidden;
+     position: absolute;
+     left: 0px;
+     top: 0px;
+     width:100%;
+     height:100%;
+     text-align:center;
+     z-index: 1000;
+	 background-color: rgba(0,0,0,0.8);
+}
+
+.overlay div {
+     width:300px;
+     margin: 200px auto;
+     background-color: rgba(255,255,255,0.95);
+     border:1px solid #000;
+     padding:15px;
+     text-align:center;
+}
+
+#buttons input { 
+	float: right;
+}
+
+#search-list > li {
+    display: inline;
+	width:100%;
+	padding:0;
+	margin:0;
+	list-style-type:none;
+}
+
+#search-list > li > a {
+    font-family: 'Raleway', sans-serif;
+	float:left;
+	width:25%;
+	text-decoration:none;
+	color:white;
+	font-size: 200%;
+	text-align:center;
+	background-color: rgba(0,0,0,0.65);
+	padding: 0.2em 0.6em;
+	border-right:1px solid rgba(255,255,255,0.85);
+}
+
+#search-list > .active > a,
+#search-list > li > a:hover { 
+    background-color:rgba(0,0,0,0.5);
+}
+
+.data-scroll {
+    position: relative;
+    overflow: hidden;
+	overflow-y:auto;
+	top:0%;
+	max-height:350px;
+}
+
+.find-data {
+    position: relative;
+    overflow: hidden;
+	top:0%;
+	margin-left:2%;
+	height:800px;
+}
+
+.find-data section {
+    font-family: 'Raleway', sans-serif;
+    position: relative; 
+    overflow: hidden;
+    top: 0; 
+	bottom:100px;
+    background-color: rgba(255,255,255,0.85);
+    padding-bottom: 35px;
+	height:800px;
+}
+
+.find-data h2 {
+    color: #000;
+    font-family: 'Raleway', sans-serif;
+}
+
+.find-data p {
+    font-family: 'Raleway', sans-serif;
+    color: #000;
+    font-size: 16px;
+}
+
+.find-data-wrapper {
+	margin-top:-5%;
+	padding-bottom:20px;
+    overflow: visible;
+	height:420px;
+}
+
+form {
+	font-family: 'Raleway', sans-serif;
+	font-size: 13px;
+}
+
+select {
+	width:90%;
+	text-align:center;
+	height:25px;
+	font-family: 'Raleway', sans-serif;
+	font-size: 12px;
+	font-weight:bold;
+}
+
+table {
+	margin: auto;
+}
+
+th, td {
+	font-family: 'Raleway', sans-serif;
+	font-size: 16px;
+	color: white;
+	padding:5px 10px 5px 10px;
+	text-align:center;
+	border:1px solid rgba(255,255,255,0.25);
+}
+
+th {
+	font-weight:200;
+    background-color: rgba(0,0,0,0.6);
+}
+
+td {
+    background-color: rgba(0,0,0,0.4);
+}
+
+.vL {
+    border-right:1px solid rgba(0,0,0,0.4);
+	height:1000px;
+}
