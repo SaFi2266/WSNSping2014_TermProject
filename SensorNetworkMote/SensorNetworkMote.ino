@@ -3,7 +3,12 @@
 #include <XBee.h>
 
 /*
- * Needs to be written
+ * The SensorNetworkMote class is used to operate a mote with the Desert Condition
+ * Monitoring system. It's main functions are to go to the location sent to it via
+ * it's XBee network, using a LS20031 GPS module to determine its position, take 
+ * readings at set intervals from a TMP36 temperature sensor and a HIH-4030 Humidity 
+ * sensor, and send the readings to the XBee network coordinator until instructed to
+ * return to a "home location" after the trip duration is finished.
  *
  * Author: Elliot Dean
  * Note: Some methods were adapted from other sketches found online. References and
@@ -24,22 +29,24 @@ int humidityReading = 0;
 
 // GPS positioning variables
 TinyGPS tinyGPS;
-long latitude, longitude;
+int data;
+long latitude, longitude, latDest, longDest;
 unsigned long fixAge;
-String destination;
-boolean atDestination = false;
-boolean isActive = false;
+long acceptableRange = 5;
 
 // Variables for XBee communication
 XBee xbee = XBee();
-uint8_t payload[] = {'X'}; // TODO: Decide on payload structure
+uint8_t arrival[] = {'A'};
+uint8_t readings[] = {'R', 0, 0, 0, 0};
 XBeeAddress64 coordinator = XBeeAddress64(0x0, 0x0);
 ZBRxResponse rx = ZBRxResponse();
-ZBTxRequest tx = ZBTxRequest(coordinator, payload, sizeof(payload));
+ZBTxRequest txA = ZBTxRequest(coordinator, arrival, sizeof(arrival));
+ZBTxRequest txR = ZBTxRequest(coordinator, readings, sizeof(readings));
 ZBTxStatusResponse txStatus = ZBTxStatusResponse();
   
 /*
- * Needs to be written
+ * This method sets up the serial port, XBee radio, and GPS module to be used in the
+ * program.
  */
 void setup() {
 
@@ -61,90 +68,250 @@ void setup() {
 } // setup
 
 /*
- * Needs to be written
+ * The main program loop first gets the reading delay and destination needed for the
+ * mote to take readings at the correct time and place. It then instructs the robot
+ * that it is attached to to move in the correct direction until it reaches the
+ * destination. Once at the destination it will take readings at the set interval
+ * until it receives another set of coordinates. It will then go to the second set of
+ * coordinates and wait for the coordinator to send out the reading parameters again,
+ * starting the next trip and next iteration of the program loop.
  */
 void loop() {
   
-  // Check if the mote is at the correct location and moves to that location if not
-  if (!atDestination)
-    goToDestination();
-    
-  // Check for incoming messages from the coordinator
-  checkMessages();
-  
-  // Takes readings and sends them to the coordinator only if the mote is active
-  if (isActive && (millis() - lastReadingTime) >= readingDelay) {
-    tempReading = getTempReading();
-    humidityReading = getHumidityReading();
-    sendReadings();
-    lastReadingTime = millis();
-  } // if - mote is active (should be taking/transmitting readings)
+  getReadingDelay();
+  getDestination();
+  goToDestination();
+  takeReadings();
+  goToDestination();
   
 } // loop
 
-/**
- * Needs to be written
+/*
+ * This method waits until a reading parameter message is received and then modifies
+ * the value of the reading delay variable to the received values. The payload
+ * structure of the reading parameter message is as follows:
+ * 
+ *	Byte 0: Message type identifier - 'P'
+ *	Byte 1: Most significant byte of the reading delay
+ *	Byte 2: Second most significant byte of the reading delay
+ *	Byte 3: Third most significant byte of the reading delay
+ *	Byte 4: Least significant byte of the reading delay
  */
- void checkMessages() {
-   
- } // checkMessages
-
-/**
- * Needs to be written
- */
- void sendReadings() {
-   
- } // sendReadings
+void getReadingDelay() {
+  
+  // Keep checking until a reading parameter is received
+  while (true) {
+    
+    xbee.readPacket();
+    if (xbee.getResponse().isAvailable()) {
+      if (xbee.getResponse().getApiId() == ZB_RX_RESPONSE) {
+        
+        // Parse the reading parameter message
+        xbee.getResponse().getZBRxResponse(rx);
+        if (rx.getData(0) == 'P') {
+          readingDelay = (((rx.getData(1) << 24) & 0xFF000000) 
+                        + ((rx.getData(2) << 16) & 0xFF0000)
+                        + ((rx.getData(3) << 8) & 0xFF00)
+                        + (rx.getData(4) & 0xFF));
+          return;
+        } // if - Reading delay message received
+        
+      } // if - Series 2 RX response
+    } // if - packet received
+    
+  } // while - waiting for reading delay message
+  
+} // getReadingDelay
 
 /*
- * Needs to be written
+ * This message waits until a destination message is received and then modifies
+ * the value of the latitude and longitude destination variables to the received 
+ * values. The payload structure of the reading parameter message is as follows:
+ * 
+ *	Byte 0: Message type identifier - 'D'
+ *	Byte 1: Most significant byte of the latitude 
+ *	Byte 2: Second most significant byte of the latitude
+ *	Byte 3: Third most significant byte of the latitude
+ *	Byte 4: Least significant byte of the latitude
+ *	Byte 5: Most significant byte of the longitude
+ *	Byte 6: Second most significant byte of the longitude
+ *	Byte 7: Third most significant byte of the longitude
+ *	Byte 8: Least significant byte of the longitude
+ */
+void getDestination() {
+  
+  // Keep checking until a destination message is received
+  while (true) {
+    
+    xbee.readPacket();
+    if (xbee.getResponse().isAvailable()) {
+      if (xbee.getResponse().getApiId() == ZB_RX_RESPONSE) {
+        
+        // Parse the destination message
+        xbee.getResponse().getZBRxResponse(rx);
+        if (rx.getData(0) == 'D') {
+          latDest = (((rx.getData(1) << 24) & 0xFF000000) 
+                   + ((rx.getData(2) << 16) & 0xFF0000)
+                   + ((rx.getData(3) << 8) & 0xFF00)
+                   + (rx.getData(4) & 0xFF));
+          longDest = (((rx.getData(5) << 24) & 0xFF000000) 
+                    + ((rx.getData(6) << 16) & 0xFF0000)
+                    + ((rx.getData(7) << 8) & 0xFF00)
+                    + (rx.getData(8) & 0xFF));
+        } // if - Destination message received
+        
+      } // if - Series 2 RX response
+    } // if - packet received
+    
+  } // while - waiting for destination message
+  
+} // getDestination
+
+/*
+ * This method will direct the robot to move until the mote is within the acceptable
+ * range (Note: the movement of the robot is unimplemented). Once the mote has reached
+ * it's destination, it will send an arrival notification message to the coordinator
+ * so that it knows it is ready to take readings. The payload of the arrival message is
+ * a single byte containing the message type identifier - 'A'.
  */
 void goToDestination() {
-  while (!atDestination) {
-    if (destination.equals(getLocation()))
-      atDestination = true;
+  
+  // Keep adjusting position until within the acceptable range
+  while (true) {
+    
+    // Check if within acceptable range
+    getLocation();
+    if ((latitude <= (latDest + acceptableRange)) && 
+        (latitude >= (latDest - acceptableRange)) &&
+        (longitude <= (longDest + acceptableRange)) &&
+        (longitude >= (longDest - acceptableRange)))
+      break;
     else {
       // This block of code would need to control the robot and be able to direct it
       // to the correct destination.
     } // else - update robot direction
+  
   } // while - not at the destination
+  
+  // Notify the coordinator with an arrival message
+  while (true) {
+    
+    // Send message and wait for ACK
+    xbee.send(txA);
+    if (xbee.readPacket(500)) {
+      if (xbee.getResponse().getApiId() == ZB_TX_STATUS_RESPONSE) {
+        
+        // Finished if successful, try again if not
+        xbee.getResponse().getZBTxStatusResponse(txStatus);
+        if (txStatus.getDeliveryStatus() == SUCCESS) return;
+        else continue;
+        
+      } // if - status response received
+    } // if - packet received
+    
+  } // while - trying to send arrival message
+    
 } // goToDestination
 
-/**
- * This method returns the current location of the mote as a string in the form
- * "latitude, longitude" where latitude and longitude are the long values read from
- * GPS module. After this method is called the global value of the longitude and 
- * latitude variables are updated so the values can be used directly elsewhere without
- * having to parse the string returned by this method.
+/*
+ * This method will take readings from the temperature and humidity sensors separated 
+ * by the reading delay and send each set of readings to the coordinator. Between
+ * readings it will check for destination messages from the coordinator which inducate
+ * that the mote should stop taking readings and return home. The payload of the
+ * reading message is as follows:
+ * 		
+ *	Byte 0: Message type identifier - 'R'
+ *	Byte 1: Most significant byte of the temperature reading
+ *	Byte 2: Least significant byte of the temperature reading
+ *	Byte 3: Most significant byte of the humidity reading
+ *	Byte 4: Least significant byte of the humidity reading
  */
-String getLocation() {
+void takeReadings() {
+  
+  // Keep taking and sending readings until new destination is received
+  lastReadingTime = millis();
+  while (true) {
+    
+    if ((millis() - lastReadingTime) >= readingDelay) {
+      
+      // Reset read time and get readings
+      lastReadingTime = millis();
+      tempReading = analogRead(tempPin);
+      humidityReading = analogRead(humidityPin);
+      
+      // Pack readings into message
+      readings[1] = (tempReading >> 8) & 0xFF;
+      readings[2] = tempReading & 0xFF;
+      readings[3] = (humidityReading >> 8) & 0xFF;
+      readings[4] = humidityReading & 0xFF;
+      
+      // Send the message to the coordinator
+      while (true) {
+
+        // Send message and wait for ACK
+        xbee.send(txR);        
+        if (xbee.readPacket(500)) {
+          if (xbee.getResponse().getApiId() == ZB_TX_STATUS_RESPONSE) {
+        
+            // Finished if successful, try again if not
+            xbee.getResponse().getZBTxStatusResponse(txStatus);
+            if (txStatus.getDeliveryStatus() == SUCCESS) return;
+            else continue;
+        
+          } // if - status response received
+        } // if - packet received
+        
+      } // while - trying to send reading message
+    
+    } // if - time to take readings
+    
+    // Check for a destination message, meaning it is time to return home
+    xbee.readPacket();
+    if (xbee.getResponse().isAvailable()) {
+      if (xbee.getResponse().getApiId() == ZB_RX_RESPONSE) {
+        
+        // Parse the destination message
+        xbee.getResponse().getZBRxResponse(rx);
+        if (rx.getData(0) == 'D') {
+          latDest = (((rx.getData(1) << 24) & 0xFF000000) 
+                   + ((rx.getData(2) << 16) & 0xFF0000)
+                   + ((rx.getData(3) << 8) & 0xFF00)
+                   + (rx.getData(4) & 0xFF));
+          longDest = (((rx.getData(5) << 24) & 0xFF000000) 
+                    + ((rx.getData(6) << 16) & 0xFF0000)
+                    + ((rx.getData(7) << 8) & 0xFF00)
+                    + (rx.getData(8) & 0xFF));
+        } // if - Destination message received
+        
+      } // if - Series 2 RX response
+    } // if - packet received
+    
+  } // while - still taking readings
+  
+} // takeReadings
+
+/*
+ * This method gets the current latitude and longitude of the mote as long values read 
+ * from the GPS module and converted to 1,000,000ths of a degree using the tinyGPS
+ * library. After this method is called the global value of the longitude and latitude
+ * variables are updated. NOTE: In order for this method to work, it must be called 
+ * frequently enough to catch the GPS as it is available so it will not update the 
+ * coordinate values if called too infrequently (100ms seems to be the longest delay 
+ * between calls that will still allow it to work properly).
+ */
+void getLocation() {
+  
   while (gps.available()) {
     
     // Get data from the GPS and parse the coordinates from it if it is valid
-    int data = gps.read();
+    data = gps.read();
     if (tinyGPS.encode(data)) {
       tinyGPS.get_position(&latitude, &longitude, &fixAge);
-      return latitude + ", " + longitude;
     } // if - valid sentence received from GPS
   
   } // while - there is data to be read from the gps
+
 } // getLocation
-
-/*
- * This method simply gets the current value of the analog pin that the temperature
- * sensor is attached to.
- */
-int getTempReading() {
-  return analogRead(tempPin);
-} // getTemp
-
-/*
- * This method simply gets the current value of the analog pin that the humidity
- * sensor is attached to.
- */
-int getHumidityReading() {
-  return analogRead(humidityPin);
-} // getHumidity
 
 /*
  * This method sends a command to an LS20031 GPS module which tells it to change the
