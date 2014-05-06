@@ -16,8 +16,8 @@
  */
 
 // Software Serial pins
-SoftwareSerial gps(2, 3);
-SoftwareSerial xbeeSerial(4, 5);
+SoftwareSerial xbeeSerial(2, 3);
+SoftwareSerial gps(4, 5);
 
 // Sensor pins and variables
 const int tempPin = A0;
@@ -32,7 +32,7 @@ TinyGPS tinyGPS;
 int data;
 long latitude, longitude, latDest, longDest;
 unsigned long fixAge;
-long acceptableRange = 5;
+long acceptableRange = 10;
 
 // Variables for XBee communication
 XBee xbee = XBee();
@@ -64,7 +64,7 @@ void setup() {
   setGPSBaudRate(1);
   gps.end();
   gps.begin(9600);
-
+ 
 } // setup
 
 /*
@@ -76,7 +76,7 @@ void setup() {
  * coordinates and wait for the coordinator to send out the reading parameters again,
  * starting the next trip and next iteration of the program loop.
  */
-void loop() {
+void loop() {  
   
   getReadingDelay();
   getDestination();
@@ -247,7 +247,7 @@ void takeReadings() {
       
       // Send the message to the coordinator
       while (true) {
-
+        
         // Send message and wait for ACK
         xbee.send(txR);        
         if (xbee.readPacket(500)) {
