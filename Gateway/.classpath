@@ -13,5 +13,6 @@
 	<classpathentry kind="lib" path="lib/RXTXcomm.jar"/>
 	<classpathentry kind="lib" path="lib/xbee-api-0.9.jar"/>
 	<classpathentry kind="lib" path="D:/Documents/git/WSNSping2014_TermProject/Gateway/lib/gson-2.2.4.jar"/>
+	<classpathentry kind="lib" path="lib"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

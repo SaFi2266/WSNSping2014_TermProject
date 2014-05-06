@@ -1,3 +1,4 @@
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -10,6 +11,7 @@ import com.rapplogic.xbee.api.XBee;
 import com.rapplogic.xbee.api.XBeeAddress64;
 import com.rapplogic.xbee.api.XBeeException;
 import com.rapplogic.xbee.api.XBeeResponse;
+import com.rapplogic.xbee.api.XBeeTimeoutException;
 import com.rapplogic.xbee.api.zigbee.ZNetRxResponse;
 import com.rapplogic.xbee.api.zigbee.ZNetTxRequest;
 import com.rapplogic.xbee.api.zigbee.ZNetTxStatusResponse;
@@ -46,7 +48,7 @@ public class Gateway {
 	 * Internet and motes/robots are able to recharge if needed) and the next
 	 * destination that the network should travel to to take the next readings.
 	 */
-	double[] homeCoordinates={40.871286, 111.259918}, destCoordinates={0, 0};
+	double[] homeCoordinates={34.023270, -83.931110}, destCoordinates={0, 0};
 	
 	/** 
 	 * The latitude and longitude difference that the motes are spread around
@@ -62,7 +64,7 @@ public class Gateway {
 	int tripDuration;
 	
 	/** The unique identifier of the group */
-	int groupId = 1; 
+	int groupId = 3; 
 	
 	SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	
@@ -84,15 +86,14 @@ public class Gateway {
 		// Create the gateway and connect to the XBee
 		Gateway gateway = new Gateway();
 		try {
-			gateway.xbee.open("COM0", 9600);
+			gateway.xbee.open("COM7", 9600);
 		} catch (XBeeException e) {
 			System.out.println("Error connecting to XBee");
 			System.exit(1);
 		} // try/catch - connect to XBee
 		
 		// Add motes to the network
-		XBeeAddress64[] moteAddrs = 
-			{new XBeeAddress64("12 23 34 45 56 67 78 89")};
+		XBeeAddress64[] moteAddrs = {new XBeeAddress64("00 13 A2 00 40 8C D7 12")};
 		gateway.addMotes(moteAddrs);
 		
 		// Start the main program loop
@@ -105,6 +106,7 @@ public class Gateway {
 	 */
 	public Gateway() {
 		xbee = new XBee();
+		this.moteList = new ArrayList<Gateway.Mote>();
 	} // Gateway
 	
 	/**
@@ -146,8 +148,7 @@ public class Gateway {
 	 */
 	private void addMotes(XBeeAddress64[] moteAddrs) {
 		
-		this.moteList.add(new Mote(moteAddrs[0], 0, 0));
-		
+		// Add all of the non central motes to the list
 		for (int i = 1; i < moteAddrs.length; i+=2) {
 			
 			this.moteList.add(new Mote(moteAddrs[i], 
@@ -157,6 +158,9 @@ public class Gateway {
 						-latSpread * (i - 1) / 2, -longSpread * (i - 1) / 2));
 			
 		} // for - each set of two mote addresses
+		
+		// Add the central mote last so that it is sent out last
+		this.moteList.add(new Mote(moteAddrs[0], 0, 0));
 		
 	} // addMotes
 	
@@ -268,7 +272,7 @@ public class Gateway {
 			mote.atDestination = false;
 			
 			// Create the message payload
-			int[] payload = new int[5];
+			int[] payload = new int[9];
 			payload[0] = 'D'; // The message type identifier
 			payload[1] = (lat >> 24) & 0xFF;
 			payload[2] = (lat >> 16) & 0xFF;
@@ -355,27 +359,26 @@ public class Gateway {
 	private void listenForReadings() {
 		
 		// Listen for readings until the elapsed time exceeds the trip duration
-		long endTime = System.currentTimeMillis() + (this.tripDuration/60000);
+		long endTime = System.currentTimeMillis() + (this.tripDuration*60000);
 		while (System.currentTimeMillis() <= endTime) {
 		
 			try {
-
 				// Wait for a packet to process
 				XBeeResponse response = this.xbee.getResponse(1000);
 				if (response.getApiId() == ApiId.ZNET_RX_RESPONSE) {
 
 					ZNetRxResponse rx = (ZNetRxResponse)response;
 					if (rx.getData()[0] == 'R') {
-						
+
 						// Parse the reading values from the payload
 						int temp = ((rx.getData()[1] << 8) & 0xFF00)
 								+ (rx.getData()[2] & 0xFF);
 						int humidity = ((rx.getData()[3] << 8) & 0xFF00)
 								+ (rx.getData()[4] & 0xFF);
-						
+
 						// Add the reading to the mote
 						for (Mote mote : this.moteList) {
-							if (mote.address == rx.getRemoteAddress64()) {
+							if (mote.address.equals(rx.getRemoteAddress64())) {
 								mote.readingLog.add(new Object[] {temp, 
 										humidity, new Date()});
 								break;
@@ -386,8 +389,10 @@ public class Gateway {
 
 				} // if - RX Response
 
+			} catch (XBeeTimeoutException e) {
+				continue;
 			} catch (XBeeException e) {
-				System.out.println("Error getting arrival message!");
+				System.out.println("Error getting reading message!");
 			} // try/catch - receive and process packet
 		
 		} // while - not yet time to return
@@ -409,18 +414,17 @@ public class Gateway {
 			String moteAddr = mote.address.toString();
 			ArrayList<Object[]> readings = mote.readingLog;
 			double latitude = this.destCoordinates[0] + mote.latOffset;
-			double longitude = this.destCoordinates[1] = mote.longOffset;
+			double longitude = this.destCoordinates[1] + mote.longOffset;
 			
 			for (Object[] reading : readings) {
 				
 				int temperature = (Integer)reading[0];
 				int humidity = (Integer)reading[1];
 				String readingTime = df.format((Date)reading[2]);
-				
 				try {
 					Request.Get(
 							"http://sensornetworks.engr.uga.edu/sp14/elliotd/php/"
-							+ "UploadData.php?password=tempPassword"
+							+ "uploadData.php?password=tempPassword"
 							+ "&radioAddress=" + URLEncoder.encode(moteAddr, "UTF-8")
 							+ "&readingTime=" + URLEncoder.encode(readingTime, "UTF-8")
 							+ "&temperature=" + temperature
