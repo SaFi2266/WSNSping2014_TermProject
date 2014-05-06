@@ -11,7 +11,7 @@ $db = new mysqli("localhost", "snadmin", "snadmin*", "sensornetworks");
 if ($db->connect_error)
 	die("Error connecting to the database");
 
-// Determine if any pairs in the user table match, return 1 if so, 0 otherwise
+// Try to create the new user, return 1 if successful, 0 otherwise
 $insertString = "INSERT INTO sensornetworks.sp14_elliotd_users " .
 "(userName, password) VALUES ('$name', SHA1('$pw'));";
 $db->query($insertString) or die('0');

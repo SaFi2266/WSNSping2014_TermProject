@@ -1,8 +1,7 @@
 <?php
 
-// Assign the get parameters to variables
-$sTime = $_REQUEST["sTime"];
-$eTime = $_REQUEST["eTime"];
+// Assign the get parameter to a variable
+$groupId = $_REQUEST["id"];
 
 // Connect to the mySQL database
 $db = new mysqli("localhost", "snadmin", "snadmin*", "sensornetworks");
@@ -11,18 +10,20 @@ $db = new mysqli("localhost", "snadmin", "snadmin*", "sensornetworks");
 if ($db->connect_error)
 	die("Error connecting to the database");
 
-// Get all tuples that match the input range
-$selectString = "SELECT * " .
-"FROM sensornetworks.sp14_elliotd_datalog " .
-"WHERE TIME(readingTime) >= '$sTime' AND TIME(readingTime) <= '$eTime';";
+// Get all tuples corresponding to motes in the given group
+$selectString = "SELECT d.* " .
+"FROM sensornetworks.sp14_elliotd_datalog d, sensornetworks.sp14_elliotd_motes m " .
+"WHERE m.group = $groupId AND m.id = d.moteId";
 $result = $db->query($selectString);
 
-// Return the HTML formatted table with the selected data
+// Print out the HTML formatted table
 echo "<table border='1'>
 <tr>
 <th>Mote Id</th>
 <th>Temperature</th>
 <th>Humidity</th>
+<th>Latitude</th>
+<th>Longitude</th>
 <th>Reading Time</th>
 <th>Upload Time</th>
 </tr>";
@@ -30,8 +31,10 @@ echo "<table border='1'>
 while($row = mysqli_fetch_array($result)) {
   echo "<tr>";
   echo "<td>" . $row['moteId'] . "</td>";
-  echo "<td>" . $row['temperature'] . "</td>";
-  echo "<td>" . $row['humidity'] . "</td>";
+  echo "<td>" . number_format($row['temperature'], 2) . "</td>";
+  echo "<td>" . number_format($row['humidity'], 2) . "</td>";
+  echo "<td>" . $row['latitude'] . "</td>";
+  echo "<td>" . $row['longitude'] . "</td>";
   echo "<td>" . $row['readingTime'] . "</td>";
   echo "<td>" . $row['uploadTime'] . "</td>";
   echo "</tr>";

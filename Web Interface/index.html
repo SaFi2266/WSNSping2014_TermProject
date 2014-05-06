@@ -38,6 +38,7 @@
                 <ul id="responsive" style="display:none" class="hidden-lg hidden-md"></ul><!-- /.responsive -->
             </div>
 
+			<!-- Main Menu Items -->
             <div class="menu visible-md visible-lg">
                 <ul id="menu-list">
                     <li class="active home-menu"><a href="#home">Home</a></li>
@@ -47,6 +48,7 @@
                 </ul>
             </div><!-- /.menu -->
 
+			<!-- Declare background images -->
             <div class="image-section">
                 <div class="image-container">
                     <img src="images/nature1.jpg" id="home-img" class="main-img inactive" alt="Home">
@@ -56,29 +58,42 @@
                 </div>
             </div>
 
+<!-------------------------------- Main Menu Selection Panes ----------------------------------------->
             <div class="row">
                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 col-lg-offset-0 col-md-offset-0 templatemo-content-wrapper">
                     <div class="templatemo-content">
                         
+						<!-- Home Pane -->
                         <section id="home-text" class="active templatemo-content-section">
                             <div class="col-sm-12 col-md-12 col-lg-12">
                                 <h2 class="text-center">Welcome to my Desert Condition Monitoring project</h2>
                                 <hr>
-								<p>Give a short introduction and site guide here.</p>
+								<p>Use the links on the left to navigate the site.</p>
                             </div>
                         </section><!-- /.home-text -->    
 
+						<!-- About Pane-->
                         <section id="about-text" class="inactive">
                             <h2 class="text-center">About The Project</h2>
 							<hr>
                             <div class="col-sm-12 col-md-12 col-lg-12">
-                                <p>Write some information about the project here.</p>
+                                <p>This project was developed as my (Elliot Dean) Wireless Sensor Networks (CSEE 4240) Spring 2014 Term Project.</p>
+								<p>The purpose of this project is to allow mobile robots to be directed to take temperature and 
+								humidity readings within a desert environment without persistent access to the internet or any other
+								form of communication. Readings taken by motes within the network can be searched for by using the 
+								Find Data option. Upcoming coordinates and other parameters for individual groups within the network
+								can be set by using the Set Locations option</p>
+								<p>The layout of this page is based on an HTML template downloaded from 
+								<a href="http://www.templatemo.com/preview/templatemo_398_nature" target="_blank"><u>Templatemo.com</u></a></p>
+								<p>The ability to move markers on the map in the Set Locations section was adapted from source code downloaded from 
+								<a href="http://rectangleworld.com/blog/archives/129" target="_blank"><u>RectangleWorld.com</u></a></p>
 							</div>
                             <div class="col-sm-6 col-md-6">
                                 <p></p>
                             </div>
                         </section><!-- /.about-text --> 
 
+						<!-- Data Search Pane -->
                         <section id="data-text" class="inactive">
                             <h2 class="text-center">Find Data</h2>
 							<hr>
@@ -90,8 +105,9 @@
 									<li class="advanced-search-menu"><a href="#advanced-search">Advanced Search</a></li>
 								</ul>
                             </div>
-                        </section><!-- /.services-text --> 
+                        </section><!-- /.data-text --> 
 
+						<!-- Location/Parameter Settings Pane -->
                         <section id="location-text" class="inactive">
                             <div class="col-sm-12 col-md-12 col-lg-12">
                                 <h2 class="text-center">Set Locations</h2>
@@ -99,20 +115,25 @@
 								<div class="col-sm-7 col-md-7 col-lg-7 vL" style="text-align:center">
 									<br><br>
 									<canvas id="mapCanvas" width="500" height="286">Error</canvas>
+									<br><br><p style="text-align:center">Move the blue markers to the location you would like a group to monitor next</p>
 								</div>
 								<div class="col-sm-5 col-md-5 col-lg-5">
-									<p>Should allow users to pick the next location for each group to 
-									gather data, as well as reading frequency, trip duration, etc.</p>
+									<h3 style="text-align:center;font-weight:bold"> Click a group marker to make changes to it</h3>
+									<p id="updateGroupStatus" style="text-align:center"></p><hr><br>
+									<form id="mapForm" action="JavaScript:updateGroup()">
+									</form>
 								</div> 
                             </div>
-                        </section><!-- /.testimonial-text --> 
+                        </section><!-- /.location-text --> 
 
                     </div><!-- /.templatemo-content -->  
                 </div><!-- /.templatemo-content-wrapper --> 
 				
+<!----------------------------------------- Search Fields ------------------------------------->
 				<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 col-lg-offset-0 col-md-offset-0 find-data-wrapper">
                     <div class="find-data">
                         
+						<!-- Mote Search -->
                         <section id="mote-search-text" class="inactive">
                             <div class="col-sm-12 col-md-12 col-lg-12">
                                 <h2 class="text-center">Search By Mote ID</h2>
@@ -132,6 +153,7 @@
                             </div>
                         </section>
 						
+						<!-- Group Search -->
 						<section id="group-search-text" class="inactive">
                             <div class="col-sm-12 col-md-12 col-lg-12">
                                 <h2 class="text-center">Search By Group ID</h2>
@@ -151,6 +173,7 @@
                             </div>
                         </section>
 						
+						<!-- Time and Date Search -->
 						<section id="time-search-text" class="inactive">
                             <div class="col-sm-12 col-md-12 col-lg-12">
                                 <h2 class="text-center">Search By Date&#47;Time</h2>
@@ -180,17 +203,132 @@
                             </div>
                         </section>
 						
+						<!-- Advanced Search -->
 						<section id="advanced-search-text" class="inactive">
                             <div class="col-sm-12 col-md-12 col-lg-12">
                                 <h2 class="text-center">Advanced Search</h2>
-                                <p></p>
+                                <hr>
+                                <div class="row">
+									<div class="data-scroll col-sm-3 col-md-3 col-lg-3 vL" style="text-align:center">
+										<form>
+											<p style="text-align:center;font-weight:bold">Options</p>
+											<hr>
+											<form>
+												<b>Mote Id:&nbsp;</b> 
+												<input type="radio" name="moteSearchType" id="moteSkip" onclick="JavaScript:populateAdvQuery(0)" checked>Skip&nbsp;
+												<input type="radio" name="moteSearchType" id="moteRange" onclick="JavaScript:populateAdvQuery(1)">Range&nbsp;
+												<input type="radio" name="moteSearchType" id="motePoint" onclick="JavaScript:populateAdvQuery(2)">Point
+											</form>
+											<br>
+											<form id="advMoteQuery" style="text-align:center"></form>
+											<hr>
+											
+											<form>
+												<b>Group Id:&nbsp;</b> 
+												<input type="radio" name="groupSearchType" id="groupSkip" onclick="JavaScript:populateAdvQuery(3)" checked>Skip&nbsp;
+												<input type="radio" name="groupSearchType" id="groupRange" onclick="JavaScript:populateAdvQuery(4)">Range&nbsp;
+												<input type="radio" name="groupSearchType" id="groupPoint" onclick="JavaScript:populateAdvQuery(5)">Point
+											</form>
+											<br>
+											<form id="advGroupQuery" style="text-align:center"></form>
+											<hr>
+											
+											<form>
+												<b>Temperature:&nbsp;</b> 
+												<input type="radio" name="tempSearchType" id="tempSkip" onclick="JavaScript:populateAdvQuery(6)" checked>Skip&nbsp;
+												<input type="radio" name="tempSearchType" id="tempRange" onclick="JavaScript:populateAdvQuery(7)">Range&nbsp;
+												<input type="radio" name="tempSearchType" id="tempPoint" onclick="JavaScript:populateAdvQuery(8)">Point
+											</form>
+											<br>
+											<form id="advTempQuery" style="text-align:center"></form>
+											<hr>
+											
+											<form>
+												<b>Humidity:&nbsp;</b> 
+												<input type="radio" name="humiditySearchType" id="humiditySkip" onclick="JavaScript:populateAdvQuery(9)" checked>Skip&nbsp;
+												<input type="radio" name="humiditySearchType" id="humidityRange" onclick="JavaScript:populateAdvQuery(10)">Range&nbsp;
+												<input type="radio" name="humiditySearchType" id="humidityPoint" onclick="JavaScript:populateAdvQuery(11)">Point
+											</form>
+											<br>
+											<form id="advHumidityQuery" style="text-align:center"></form>
+											<hr>
+											
+											<form>
+												<b>Reading Time:&nbsp;</b> 
+												<input type="radio" name="readTimeSearchType" id="readTimeSkip" onclick="JavaScript:populateAdvQuery(12)" checked>Skip&nbsp;
+												<input type="radio" name="readTimeSearchType" id="readTimeRange" onclick="JavaScript:populateAdvQuery(13)">Range&nbsp;
+												<input type="radio" name="readTimeSearchType" id="readTimePoint" onclick="JavaScript:populateAdvQuery(14)">Point
+											</form>
+											<br>
+											<form id="advReadTimeQuery" style="text-align:center"></form>
+											<hr>
+											
+											<form>
+												<b>Upload Time:&nbsp;</b> 
+												<input type="radio" name="uploadTimeSearchType" id="uploadTimeSkip" onclick="JavaScript:populateAdvQuery(15)" checked>Skip&nbsp;
+												<input type="radio" name="uploadTimeSearchType" id="uploadTimeRange" onclick="JavaScript:populateAdvQuery(16)">Range&nbsp;
+												<input type="radio" name="uploadTimeSearchType" id="uploadTimePoint" onclick="JavaScript:populateAdvQuery(17)">Point
+											</form>
+											<br>
+											<form id="advUploadTimeQuery" style="text-align:center"></form>
+											<hr>
+											
+											<form>
+												<b>Reading Date:&nbsp;</b> 
+												<input type="radio" name="readDateSearchType" id="readDateSkip" onclick="JavaScript:populateAdvQuery(18)" checked>Skip&nbsp;
+												<input type="radio" name="readDateSearchType" id="readDateRange" onclick="JavaScript:populateAdvQuery(19)">Range&nbsp;
+												<input type="radio" name="readDateSearchType" id="readDatePoint" onclick="JavaScript:populateAdvQuery(20)">Point
+											</form>
+											<br>
+											<form id="advReadDateQuery" style="text-align:center"></form>
+											<hr>
+											
+											<form>
+												<b>Upload Date:&nbsp;</b> 
+												<input type="radio" name="uploadDateSearchType" id="uploadDateSkip" onclick="JavaScript:populateAdvQuery(21)" checked>Skip&nbsp;
+												<input type="radio" name="uploadDateSearchType" id="uploadDateRange" onclick="JavaScript:populateAdvQuery(22)">Range&nbsp;
+												<input type="radio" name="uploadDateSearchType" id="uploadDatePoint" onclick="JavaScript:populateAdvQuery(23)">Point
+											</form>
+											<br>
+											<form id="advUploadDateQuery" style="text-align:center"></form>
+											<hr>
+											
+											<form>
+												<b>Latitude:&nbsp;</b> 
+												<input type="radio" name="latitudeSearchType" id="latitudeSkip" onclick="JavaScript:populateAdvQuery(24)" checked>Skip&nbsp;
+												<input type="radio" name="latitudeSearchType" id="latitudeRange" onclick="JavaScript:populateAdvQuery(25)">Range&nbsp;
+												<input type="radio" name="latitudeSearchType" id="latitudePoint" onclick="JavaScript:populateAdvQuery(26)">Point
+											</form>
+											<br>
+											<form id="advLatitudeQuery" style="text-align:center"></form>
+											<hr>
+											
+											<form>
+												<b>Longitude:&nbsp;</b> 
+												<input type="radio" name="longitudeSearchType" id="longitudeSkip" onclick="JavaScript:populateAdvQuery(27)" checked>Skip&nbsp;
+												<input type="radio" name="longitudeSearchType" id="longitudeRange" onclick="JavaScript:populateAdvQuery(28)">Range&nbsp;
+												<input type="radio" name="longitudeSearchType" id="longitudePoint" onclick="JavaScript:populateAdvQuery(29)">Point
+											</form>
+											<br>
+											<form id="advLongitudeQuery" style="text-align:center"></form>
+											<hr>
+											<input type="submit" name="submit" value="Submit" onclick="JavaScript:advancedSearch()">
+											<br><br><br>
+											
+										</form>
+									</div>
+									<div class="data-scroll col-sm-9 col-md-9 col-lg-9">
+										<p id="advancedData" style="text-align:center"></p>
+									</div>
+								</div>
                             </div>
                         </section>
 						
                     </div>
                 </div>
             </div><!-- /.row --> 
-
+	
+			<!-- Footer -->
             <div class="row">
                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 footer">
                     <p class="footer-text">HTML5 Page Template Downloaded From: 
@@ -208,6 +346,7 @@
         <script src="js/jquery.backstretch.min.js"></script>
         <script src="js/templatemo_script.js"></script>
         
+	<!-- Login Popup -->
 	<div id="overlay" class="overlay">
 		<div>
 			<h1 id="overlayHead">Please Log In</h1>
@@ -228,6 +367,7 @@
 		</div>
 	</div>
 	
+	<!-- Create User Popup -->
 	<div id="newUser" class="overlay">
 		<div>
 			<h1 id="signUpHead">Sign Up</h1>

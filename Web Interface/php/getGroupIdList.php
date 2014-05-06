@@ -7,10 +7,10 @@ $db = new mysqli("localhost", "snadmin", "snadmin*", "sensornetworks");
 if ($db->connect_error)
 	die("Error connecting to the database");
 
-// Get and return the list of all mote id's
-$selectString = "SELECT DISTINCT id FROM sensornetworks.sp14_elliotd_motes;";
+// Get and print the list of all group id's
+$selectString = "SELECT DISTINCT groupId FROM sensornetworks.sp14_elliotd_groups;";
 $res = $db->query($selectString);
 while ($row = $res->fetch_assoc())
-	echo $row['id'] . ' ';
+	echo $row['groupId'] . ' ';
 
 ?>

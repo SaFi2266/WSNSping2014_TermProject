@@ -1,5 +1,6 @@
 <?php
 
+// Assign the get parameters to variables
 $sDate = $_REQUEST["sDate"];
 $eDate = $_REQUEST["eDate"];
 
@@ -11,7 +12,7 @@ if ($db->connect_error)
 	die("Error connecting to the database");
 
 // Get all tuples that match the input range
-$selectString = "SELECT temperature, humidity, readingTime, uploadTime " .
+$selectString = "SELECT * " .
 "FROM sensornetworks.sp14_elliotd_datalog " .
 "WHERE DATE(readingTime) >= '$sDate' AND DATE(readingTime) <= '$eDate';";
 $result = $db->query($selectString);
@@ -19,6 +20,7 @@ $result = $db->query($selectString);
 // Return the HTML formatted table with the selected data
 echo "<table border='1'>
 <tr>
+<th>Mote Id</th>
 <th>Temperature</th>
 <th>Humidity</th>
 <th>Reading Time</th>
@@ -27,6 +29,7 @@ echo "<table border='1'>
 
 while($row = mysqli_fetch_array($result)) {
   echo "<tr>";
+  echo "<td>" . $row['moteId'] . "</td>";
   echo "<td>" . $row['temperature'] . "</td>";
   echo "<td>" . $row['humidity'] . "</td>";
   echo "<td>" . $row['readingTime'] . "</td>";
